@@ -108,10 +108,14 @@
         </div>
         <div>
           <label>Thumbnail concurrent (optionnel)</label>
+          <div style="margin-bottom:8px;display:flex;gap:8px">
+            <input type="text" id="ytUrl" placeholder="URL YouTube : https://youtu.be/xxxxx" style="flex:1;font-size:13px" />
+            <button onclick="loadFromUrl()" style="background:var(--accent-blue);color:#fff;border:none;border-radius:8px;padding:0 14px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">Charger</button>
+          </div>
           <div class="upload-zone" id="compZone">
             <input type="file" id="compInput" accept="image/*" />
             <div class="upload-icon">🎯</div>
-            <p>Thumbnail YouTube à imiter<br/><span style="color:var(--text-dim);font-size:11px">Pour le style de mise en page</span></p>
+            <p>Ou dépose le thumbnail ici<br/><span style="color:var(--text-dim);font-size:11px">Pour le style de mise en page</span></p>
             <div class="file-name" id="compName"></div>
           </div>
           <img class="preview-img" id="compPreview" />
@@ -288,6 +292,39 @@ NO watermarks, NO logos, NO brand names, NO faces other than the attached refere
   }
 
   function toggleCheck(cb) { cb.parentElement.classList.toggle('checked', cb.checked); }
+
+  function extractVideoId(url) {
+    const patterns = [
+      /youtu\.be\/([\w-]{11})/,
+      /youtube\.com\/watch\?v=([\w-]{11})/,
+      /youtube\.com\/shorts\/([\w-]{11})/,
+      /youtube\.com\/embed\/([\w-]{11})/,
+      /v=([\w-]{11})/
+    ];
+    for (const p of patterns) {
+      const m = url.match(p);
+      if (m) return m[1];
+    }
+    return null;
+  }
+
+  function loadFromUrl() {
+    const url = document.getElementById('ytUrl').value.trim();
+    if (!url) { alert('Entre une URL YouTube !'); return; }
+    const videoId = extractVideoId(url);
+    if (!videoId) { alert('URL YouTube invalide. Exemple: https://youtu.be/dQw4w9WgXcQ'); return; }
+    const thumbUrl = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
+    const prev = document.getElementById('compPreview');
+    const zone = document.getElementById('compZone');
+    const name = document.getElementById('compName');
+    prev.src = thumbUrl;
+    prev.style.display = 'block';
+    prev.onerror = () => {
+      prev.src = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+    };
+    zone.classList.add('has-file');
+    name.textContent = 'Chargé depuis YouTube ✓';
+  }
 </script>
 </body>
 </html>
